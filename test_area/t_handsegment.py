@@ -5,7 +5,6 @@ boundaries = [
     ([25, 0, 75], [180, 38, 255])
 ]
 
-
 def handsegment(frame):
     lower, upper = boundaries[0]
     lower = np.array(lower, dtype="uint8")      # 데이터 타입은 unsigned integers 8비트

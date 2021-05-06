@@ -2,7 +2,7 @@ import cv2
 import os
 import pickle
 from os.path import join, exists
-import handsegment as hs
+import t_handsegment as hs
 import argparse
 from tqdm import tqdm
 
@@ -26,6 +26,9 @@ def convert(gesture_folder, target_folder):
 
     # gestures 리스트의 인덱스를 통해 반복문을 실행합니다. unit은 단위명을 지정하며  ascii가 True인 것은 진행바가 #로 표현됩니다.
     for gesture in tqdm(gestures, unit='actions', ascii=True): 
+        if gesture == ".DS_Store":
+            continue
+
         gesture_path = os.path.join(gesture_folder, gesture) # gesture_path 변수에 gesture_folder와 gesture 의 경로명을 합친 값을 저장합니다.
         os.chdir(gesture_path)                               # 현재 디렉토리의 경로를 gesture_path 로 변경합니다.
 
@@ -38,6 +41,9 @@ def convert(gesture_folder, target_folder):
 
         # videos 리스트의 인덱스를 통해 반복문을 실행합니다. unit은 단위명을 지정하며  ascii가 True인 것은 진행바가 #로 표현됩니다.
         for video in tqdm(videos, unit='videos', ascii=True):
+            if video == ".DS_Store":
+                continue
+
             name = os.path.abspath(video)                       # 인덱스의 경로명을 name 변수에 저장합니다.
             cap = cv2.VideoCapture(name)                        # capturing input video / name 비디오를 이용합니다.
             frameCount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # 사용한 비디오의 프레임 수를 저장합니다.
@@ -47,10 +53,13 @@ def convert(gesture_folder, target_folder):
             count = 0                                           # count 변수가 0인 상태로 정의됩니다.
 
             # assumption only first 200 frames are important / 비디오에서 처음 200 프레임만 따옵니다.
-            while count < 201:
+            while count < 200:
                 ret, frame = cap.read()  # extract frame / 파일을 읽습니다. 성공시 수신한 바이트 수를 리턴하며 실패시 -1을 반환합니다.
                 if ret is False:         # 파일을 읽는 것을 실패하면 반복문을 종료합니다.
-                    print("WARNING!! VIDEO_READ_FAIL")
+                    if count > 1 :
+                        print(" \n Total Frame_Count :" + str(count))
+                        break
+                    print(" \n WARNING!! VIDEO_READ_FAIL")
                     break
                 framename = os.path.splitext(video)[0]                                  # 파일의 확장자를 따옵니다.
                 framename = framename + "_frame_" + str(count) + ".jpeg"                # 프레임 이미지의 이름을 재정의 합니다.
@@ -58,7 +67,9 @@ def convert(gesture_folder, target_folder):
 
                 if not os.path.exists(framename):                   # 이미지의 존재 여부를 확인합니다.
                     frame = hs.handsegment(frame)                   # handsegement의 리턴값을 frame에 저장합니다.
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 이미지의 색상을 BGR기준으로 GARY로 변경합니다.
+                    #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 이미지의 색상을 BGR기준으로 GRAY로 변경합니다.
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                    #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
                     lastFrame = frame                              
                     cv2.imwrite(framename, frame)                   # 파일을 저장합니다.
 
@@ -81,10 +92,7 @@ def convert(gesture_folder, target_folder):
 
     os.chdir(rootPath) # 현재 디렉토리의 위치를 rootPath로 변경합니다.
 
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Extract Individual Frames from gesture videos.')
-    parser.add_argument('gesture_folder', help='Path to folder containing folders of videos of different gestures.')
-    parser.add_argument('target_folder', help='Path to folder where extracted frames should be kept.')
-    args = parser.parse_args()
-    convert(args.gesture_folder, args.target_folder)
+    gesture_folder = "/Users/tuan/Documents/University/3학년/설계및프로젝트/Project_KSLDeepLearning/test_area/data"
+    target_folder = "/Users/tuan/Documents/University/3학년/설계및프로젝트/Project_KSLDeepLearning/test_area/image_JKH"
+    convert(gesture_folder, target_folder)
