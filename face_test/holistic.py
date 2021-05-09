@@ -1,10 +1,11 @@
 import cv2
 import mediapipe as mp
 import os
+import pandas as pd
 mp_drawing = mp.solutions.drawing_utils
 mp_holistic = mp.solutions.holistic
 
-# For static images:
+#For static images:
 file_list = os.listdir("/Users/tuan/Documents/University/3학년/설계및프로젝트/Project_KSLDeepLearning/face_test/data")
 f = open("/Users/tuan/Documents/University/3학년/설계및프로젝트/Project_KSLDeepLearning/face_test/특징점.txt", 'w')
 
@@ -29,29 +30,24 @@ with mp_holistic.Holistic(
     annotated_image = image.copy()
     mp_drawing.draw_landmarks(
         annotated_image, results.face_landmarks, mp_holistic.FACE_CONNECTIONS)
-    f.write("face_landmarks \n" + str(mp_holistic.FACE_CONNECTIONS) + "\n ==================================== \n")
-    print("face_landmarks \n" + str(mp_holistic.FACE_CONNECTIONS) + "\n ==================================== \n")
+    f.write("face_landmarks \n" + str(results.face_landmarks) + "\n =================================================================================================== \n")
 
     mp_drawing.draw_landmarks(
         annotated_image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-    f.write("left_hand_landmarks \n" + str(mp_holistic.HAND_CONNECTIONS) + "\n ==================================== \n")
-    print("left_hand_landmarks \n" + str(mp_holistic.HAND_CONNECTIONS) + "\n ==================================== \n")
+    f.write("left_hand_landmarks \n" + str(results.left_hand_landmarks) + "\n ===================================================================================================== \n")
 
     mp_drawing.draw_landmarks(
         annotated_image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
-    f.write("right_hand_landmarks \n" + str(mp_holistic.HAND_CONNECTIONS) + "\n ==================================== \n")
-    print("right_hand_landmarks \n" + str(mp_holistic.HAND_CONNECTIONS) + "\n ==================================== \n")
+    f.write("right_hand_landmarks \n" + str(results.right_hand_landmarks) + "\n ===================================================================================================== \n")
 
     mp_drawing.draw_landmarks(
         annotated_image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
-    f.write("pose_landmarks \n" + str(mp_holistic.POSE_CONNECTIONS) + "\n ==================================== \n")
-    print("pose_landmarks \n" + str(mp_holistic.POSE_CONNECTIONS) + "\n ==================================== \n")
+    f.write("pose_landmarks \n" + str(results.pose_landmarks) + "\n ===================================================================================================== \n")
 
-    cv2.imwrite("/Users/tuan/Documents/University/3학년/설계및프로젝트/Project_KSLDeepLearning/face_test/" + str(idx) + '.jpg', annotated_image)
 
 f.close()
 
-# For webcam input:
+#For webcam input:
 # cap = cv2.VideoCapture(0)
 # with mp_holistic.Holistic(
 #     min_detection_confidence=0.5,
@@ -78,6 +74,7 @@ f.close()
 #         image, results.face_landmarks, mp_holistic.FACE_CONNECTIONS)
 #     mp_drawing.draw_landmarks(
 #         image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+#     print(results.left_hand_landmarks)
 #     mp_drawing.draw_landmarks(
 #        image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
 #     mp_drawing.draw_landmarks(
