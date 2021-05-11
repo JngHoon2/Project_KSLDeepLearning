@@ -107,7 +107,7 @@ with mp_holistic.Holistic(
         cx, cy = int(lm.x * w), int(lm.y * h)
         pose_List.extend([cx, cy])
         id_count += 1
-    
+
     pose_col_list = []
 
     for i in range(id_count):
@@ -121,7 +121,6 @@ with mp_holistic.Holistic(
 
     df_total = pd.concat([df_face, df_left_hand, df_right_hand, df_pose], axis=1)
     print(df_total)
-    
 
 
 df_total.to_csv('/Users/tuan/Documents/University/3학년/설계및프로젝트/Project_KSLDeepLearning/face_test/특징점.csv')
