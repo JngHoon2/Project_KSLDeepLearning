@@ -5,4 +5,12 @@
 한국 수어 딥러닝 프로젝트입니다.
 
 ##########################################
-ㄴ 데이터 : KSL, 한국의료수어원
+데이터 : KSL, 한국의료수어원
+
+ㄴ NAMEFILE/data
+              ㄴ /video
+              ㅣ    ㄴ /KSL / gestures_x / videos
+              ㅣ    ㄴ /Medical sign / gestures_x / videos
+              ㄴ /image
+                    ㄴ /frame image / gesture_x / imgs
+                    ㄴ /opflow image / gesture_x / imgs
