@@ -128,7 +128,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
 landmarks = []
 
-for val in range(1, 544):
+for val in range(1, int(len(row) / 2) + 1):
 #     landmarks += ['x{}'.format(val), 'y{}'.format(val), 'z{}'.format(val), 'v{}'.format(val)]
     landmarks += ['x{}'.format(val), 'y{}'.format(val)]
 
