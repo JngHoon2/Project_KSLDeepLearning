@@ -1,0 +1,78 @@
+# Dense Optical Flow in OpenCV
+# 프레임의 모든 포인트에 대한 광학 흐름을 계산한다.
+# 영상속의 움직임을 크기와 방향, 2개의 채널로 나타낸다.
+# (u, v) 움직임의 방향은 방향에 해당하는 Hue(색상) 값으로 이미지를 나타내고 크기는 Value plane으로 나타낸다.
+
+# videos 디렉토리에 캡쳐할 의료수어 동영상을 넣어놓았음
+# videos 디렉토리에 존재하는 모든 동영상들을 캡쳐하는 작업을 진행한다.
+# 캡쳐한 사진들은 마지막으로 캡쳐한 사진의 이름의 숫자 다음부터 이어서 저장하도록 한다.
+
+import numpy as np
+import cv2
+import os
+import time
+
+file_list=os.listdir("C:/Users/권호/test/videos") # 동영상 파일이 들어가 있는 폴더 파일들 리스트
+#file_list.sort() # 리스트를 이름순으로 정렬합니다.
+
+capture_list=os.listdir("C:/Users/권호/test/images") # images 폴더에 들어가 있는 파일들 리스트
+capture_list.sort() #리스트를 이름순으로 정렬합니다.
+
+print(file_list)
+#a, b, getnum=next(os.walk("C:/Users/권호/test/images"))
+sp = capture_list[-1].split('frame') # frame1.jpg의 형태, ['', '1.jpg']
+getnum=int(sp[-1].split('.png')[0]) # ['1', ''] 여기서 첫 번째 값을 int로 변경한다.
+
+count = getnum + 1 #저장되는 프레임 당 이미지의 이름을 정해줄 때 사용, 현재 존재하는 파일이름에 들어간 숫자 다음 숫자로 지정
+filename_count = 1
+
+for i in file_list: # video 폴더에 존재하는 모든 파일들로 캡쳐작업 진행
+    path = "C:/Users/권호/test/videos/" + i # 폴더의 각 파일에 대한 경로
+    cap = cv2.VideoCapture(path)
+
+    ret, frame1 = cap.read()
+    prev = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY) # 이전영상
+    hsv = np.zeros_like(frame1)
+    hsv[...,1] = 255
+
+    rgb_path = "../test/images/rgb_%d" % filename_count
+    origin_path = "../test/orginal_images/org_%d" % filename_count
+
+    if not os.path.isdir(rgb_path): # 저장할 경로에 파일이 존재하지 않으면
+        os.mkdir(rgb_path) # rgb 이미지가 저장될 경로 생성
+
+    if not os.path.isdir(origin_path): 
+        os.mkdir(origin_path) # 원본 이미지가 저장될 경로 생성
+    
+    while(1):
+        ret, frame2 = cap.read()
+
+        try:
+            nexts = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY) # 현재영상
+            flow = cv2.calcOpticalFlowFarneback(prev,nexts,None,0.5,3,15,3,5,1.2,0) # 모든 픽셀에 대해 optical flow를 계산하는 방법, 계산된 optical flow
+            
+            mag, ang = cv2.cartToPolar(flow[...,0],flow[...,1]) # 2D 벡터의 크기 및 각도계산
+            hsv[...,0] = ang*180/np.pi/2
+            hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX) # 기존의 값을 새로운 범위로 변환
+            rgb = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
+            
+            cv2.imshow('frame2', rgb)
+
+            if(int(cap.get(1)) % 5 == 0): #5프레임당 하나씩 이미지 추출, 5프레임 단위로 쪼개는게 제일 특징점이 잘 잡힘
+                print('Saved frame number : ' + str(int(cap.get(1))))
+                cv2.imwrite("../test/images/rgb_%d/rgb_img%d.png" % (filename_count, count), rgb) #추출된 이미지가 저장되는 경로
+                cv2.imwrite("../test/orginal_images/org_%d/org_img%d.png" % (filename_count, count), frame2) # frame별 원본 이미지
+                count += 1
+                
+            if(cv2.waitKey(30) & 0xff) == 27: #키 입력을 받으면 종료, 27 == ESC(아스키코드)
+                break
+        except:
+            break
+
+        prev = nexts
+
+    filename_count += 1    
+    count = 1
+
+    cap.release() #영상 파일 사용을 종료
+    cv2.destroyAllWindows()
