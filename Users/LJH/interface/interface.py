@@ -8,6 +8,8 @@ import time
 
 class interface(QWidget):
     videoFlag = False
+    frameNumber = 0
+    frame_list = []
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Korea Sign Lanuage Recognater")
@@ -95,7 +97,6 @@ class interface(QWidget):
         self.txtNoti.append("Notify | 5. If program recoginze sign lanuage, ")
         self.txtNoti.append("Notify |    print class in txt-Recoginze")
 
-        
         self.show()
     
     def setFPS(self):
@@ -143,24 +144,40 @@ class interface(QWidget):
     def nextFrameSlot(self):
         _, cam = self.cpt.read()
         cam = cv2.cvtColor(cam, cv2.COLOR_BGR2RGB)
-        
         self.img_p = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY)
         cv2.imwrite("img_p.jpg", self.img_p)
         self.compare(self.img_o, self.img_p)
         self.img_o = self.img_p.copy()
         img = QImage(cam, cam.shape[1], cam.shape[0], QImage.Format_RGB888)
         pix = QPixmap.fromImage(img)
-        self.frame.setPixmap(pix) 
+        self.frame.setPixmap(pix)
+
+        self.frame_list.append(cam)
+        self.frameNumber += 1
+        #self.deliverFrame(self.frameInfo)
+        # ㄴ 모델이랑 연동되면 주석 해제, 모델로 프레임 정보를 보냄
+
+        # if 모델에서 아웃풋이 나온다면(모델.py의 함수, return Bool):
+        #    self.txtRecog.append(아웃풋을 리턴하는 함수, 리턴값은 string) + 시간
+
+    def deliverFrame(self, frameInfo):
+        self.info = frameInfo
+        return self.info
 
     def stop(self):
         t = time.localtime()
         if self.videoFlag == False:
-            self.txtNoti.append("Notify | Camera is alrady start | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
+            self.txtNoti.append("Notify | Camera is alrady End | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
         else:
+            self.frame_array = np.array(self.frame_list)
+            print(self.frame_array.shape)
             self.videoFlag = False
             self.frame.setPixmap(QPixmap.fromImage(QImage()))
             self.timer.stop()
             self.txtNoti.append("Log     | Camera Stop" + " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
+            self.txtNoti.append("Notifiy | total Frame : "+ str(self.frameNumber) + " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
+            self.frameNumber = 0
+            self.frame_list = []
 
     def compare(self, img_o, img_p):
         err = np.sum((img_o.astype("float") - img_p.astype("float")) ** 2)
