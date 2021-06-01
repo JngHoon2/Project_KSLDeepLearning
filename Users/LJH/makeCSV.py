@@ -44,7 +44,8 @@ for i in range(categorie_files):
 
 ################################################################
 
-cap = cv2.VideoCapture(filepath_list[0])
+#cap = cv2.VideoCapture(filepath_list[0])
+cap = cv2.VideoCapture(0)
 framecount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 print(framecount)
 
@@ -52,9 +53,12 @@ print(framecount)
 # Initiate holistic model
 with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     framelist = []
+    np_framelist = []
     while cap.isOpened():
         ret, frame = cap.read()
-        
+        np_frame = np.array(frame)
+        np_framelist.append(np_frame)
+
         try:
             #RGB로 변환
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -103,6 +107,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
         pose = results.pose_landmarks.landmark
         pose_row = list(np.array([[landmark.x * image_height, landmark.y * image_height] for landmark in pose]).flatten())
 
+
         try:
             left_hand = results.left_hand_landmarks.landmark
             left_hand_row = list(np.array([[landmark.x * image_height, landmark.y * image_height] for landmark in left_hand]).flatten())
@@ -119,7 +124,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                                                                     ##
         framelist.append(row)
 
-        if cv2.waitKey(10) & 0xFF == ord('q'):
+        if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     
 
@@ -138,6 +143,10 @@ df = pd.DataFrame(framelist, columns= landmarks)
 print(df.shape)
 df.to_csv(os.getcwd() + "/Users/LJH/특징점.csv", index= True, encoding= 'euc-kr')
 
+
+np_framelist = np.array(np_framelist)
 numpyData = df.to_numpy
 
-print(numpyData)
+df_numpyArray = df.to_numpy()
+
+print(np_framelist.shape)
