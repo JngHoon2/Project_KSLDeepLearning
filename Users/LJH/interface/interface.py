@@ -16,7 +16,7 @@ class interface(QWidget):
     def initUI(self):
         self.cpt = cv2.VideoCapture(0)
         self.fps = 30
-        self.sens = 300
+        self.sens = 500
         _, self.img_o = self.cpt.read()
         self.img_o = cv2.cvtColor(self.img_o, cv2.COLOR_RGB2GRAY)
         cv2.imwrite("img_0.jpg", self.img_o)
@@ -24,36 +24,44 @@ class interface(QWidget):
         self.cnt = 0
 
         self.frame = QLabel(self)
-        self.frame.resize(890, 600)
+        self.frame.resize(890, 570)
         self.frame.setScaledContents(True)
         self.frame.move(5,5)
 
         self.btn_on = QPushButton("시작", self)
         self.btn_on.resize(100, 25)
-        self.btn_on.move(5,610)
+        self.btn_on.move(5,590)
         self.btn_on.clicked.connect(self.start)
 
         self.btn_off = QPushButton("종료", self)
         self.btn_off.resize(100, 25)
-        self.btn_off.move(5+100+5,610)
+        self.btn_off.move(5+100+5,590)
         self.btn_off.clicked.connect(self.stop)
 
         self.prt = QLabel(self)
         self.prt.resize(200, 25)
-        self.prt.move(5+105+105, 610)
+        self.prt.move(5+105+105, 593)
 
+        self.lblfps = QLabel(self)
+        self.lblfps.resize(200, 25)
+        self.lblfps.move(460 + 93, 580)
+        self.lblfps.setText("FPS Control")
         self.fps_slider = QSlider(Qt.Horizontal, self)
         self.fps_slider.resize(100, 25)
-        self.fps_slider.move(5+105+105+200, 610)
+        self.fps_slider.move(450 + 90, 610)
         self.fps_slider.setMinimum(1)
         self.fps_slider.setMaximum(30)
         self.fps_slider.setValue(30)
         self.fps_slider.valueChanged.connect(self.setFPS)
         self.fps_slider.sliderReleased.connect(self.notiFPS)
 
+        self.lblSens = QLabel(self)
+        self.lblSens.resize(200, 25)
+        self.lblSens.move(710, 580)
+        self.lblSens.setText("Sens Control")
         self.sens_slider = QSlider(Qt.Horizontal, self)
         self.sens_slider.resize(100, 25)
-        self.sens_slider.move(5+105+105+200+105,610)
+        self.sens_slider.move(700,610)
         self.sens_slider.setMinimum(50)
         self.sens_slider.setMaximum(500)
         self.sens_slider.setValue(300)
@@ -82,13 +90,13 @@ class interface(QWidget):
 
         self.show()
     
-
     def setFPS(self):
         self.fps = self.fps_slider.value()
         try:
             self.timer.stop()
             self.timer.start(1000. / self.fps)
         except:
+            self.frame.setPixmap(QPixmap.fromImage(QImage()))
             pass
         self.prt.setText("FPS :" + str(self.fps))
 
@@ -108,10 +116,9 @@ class interface(QWidget):
             self.timer.stop()
             self.timer.start(1000. / self.fps)
         except:
-            pass    
+            pass
         self.txtNoti.append("Log     | Chage FPS to " + str(self.fps))
         
-    
     def notiSens(self):
         self.sens = self.sens_slider.value()
         self.txtNoti.append("Log     | Chage Sens to " + str(self.sens))
