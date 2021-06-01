@@ -7,6 +7,7 @@ import numpy as np
 import time
 
 class interface(QWidget):
+    videoFlag = False
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Korea Sign Lanuage Recognater")
@@ -87,7 +88,14 @@ class interface(QWidget):
         self.txtNoti = QTextBrowser(self)
         self.txtNoti.resize(440, 110)
         self.txtNoti.move(455, 670)
+        self.txtNoti.append("Notify | 1. you can chage FPS using FPS Control")
+        self.txtNoti.append("Notify | 2. you can chage Sensitivity using Sens Control")
+        self.txtNoti.append("Notify | 3. you can turn on WebCam to click Start Button")
+        self.txtNoti.append("Notify | 4. you can turn off WebCam to click End Button")
+        self.txtNoti.append("Notify | 5. If program recoginze sign lanuage, ")
+        self.txtNoti.append("Notify |    print class in txt-Recoginze")
 
+        
         self.show()
     
     def setFPS(self):
@@ -98,17 +106,13 @@ class interface(QWidget):
         except:
             self.frame.setPixmap(QPixmap.fromImage(QImage()))
             pass
-        self.prt.setText("FPS :" + str(self.fps))
+        t = time.localtime()
+        self.prt.setText("FPS :" + str(self.fps)+ " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
 
     def setSens(self):
         self.sens = self.sens_slider.value()
-        self.prt.setText("Sens: " + str(self.sens))
-
-    def start(self):
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.nextFrameSlot)
-        self.timer.start(1000. / self.fps)
-        self.txtNoti.append("Log     | Camera Start")
+        t = time.localtime()
+        self.prt.setText("Sens: " + str(self.sens) + " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
 
     def notiFPS(self): 
         self.fps = self.fps_slider.value()
@@ -117,11 +121,24 @@ class interface(QWidget):
             self.timer.start(1000. / self.fps)
         except:
             pass
-        self.txtNoti.append("Log     | Chage FPS to " + str(self.fps))
+        t = time.localtime()
+        self.txtNoti.append("Log     | Chage FPS to " + str(self.fps) + " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
         
     def notiSens(self):
         self.sens = self.sens_slider.value()
-        self.txtNoti.append("Log     | Chage Sens to " + str(self.sens))
+        t = time.localtime()
+        self.txtNoti.append("Log     | Chage Sens to " + str(self.sens) + " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
+
+    def start(self):
+        t = time.localtime()
+        if self.videoFlag == True:
+            self.txtNoti.append("Notify | Camera is alrady start | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
+        else:
+            self.videoFlag = True
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.nextFrameSlot)
+            self.timer.start(1000. / self.fps)
+            self.txtNoti.append("Log     | Camera Start" + " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
 
     def nextFrameSlot(self):
         _, cam = self.cpt.read()
@@ -136,9 +153,14 @@ class interface(QWidget):
         self.frame.setPixmap(pix) 
 
     def stop(self):
-        self.frame.setPixmap(QPixmap.fromImage(QImage()))
-        self.timer.stop()
-        self.txtNoti.append("Log     | Camera Stop")
+        t = time.localtime()
+        if self.videoFlag == False:
+            self.txtNoti.append("Notify | Camera is alrady start | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
+        else:
+            self.videoFlag = False
+            self.frame.setPixmap(QPixmap.fromImage(QImage()))
+            self.timer.stop()
+            self.txtNoti.append("Log     | Camera Stop" + " | {}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec))
 
     def compare(self, img_o, img_p):
         err = np.sum((img_o.astype("float") - img_p.astype("float")) ** 2)
